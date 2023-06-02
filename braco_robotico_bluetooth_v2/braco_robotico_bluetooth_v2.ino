@@ -17,6 +17,8 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 void writeServos(int posicao, int tempo);
 void beginServos();
 
+void mover(uint8_t Servo, int origen, int destino);
+
 // Código referente aos servos
 uint8_t SERVO_GARRA  = 0; 
 uint8_t SERVO_BASE   = 4;
@@ -27,6 +29,7 @@ int posicao_base     = 80;
 int posicao_elevador = 120;
 int posicao_frente   = 90;
 int posicao_garra    = 80;
+
 // definindo os valores que podem ser recebidos
 String bbase_mais    = "bbmais";
 String bbase_menos   = "bbmenos";
@@ -36,6 +39,7 @@ String bsobe_mais    = "bsmais";
 String bsobe_menos   = "bsmenos";
 String bfrente_mais  = "bfmais";
 String bfrente_menos = "bfmenos";
+
 #define SALTO 5;
 
 ///////////////////////////////// Configurações referente ao Bluetooth
@@ -49,7 +53,7 @@ char resp;
 
 void setup() {
   bluetooth.begin(9600);
-  Serial.begin(19200);
+  Serial.begin(9600);
   beginServos();
   delay(300);
 
@@ -63,13 +67,8 @@ void setup() {
   delay(300);
 }
 
-int inicio = 2;
-void loop() {
-  if(inicio == 0){
-    inicio = 1;
-    pegar_pincel();
-  }
 
+void loop() {
 
   while(bluetooth.available()){
     resp = bluetooth.read();
@@ -79,55 +78,23 @@ void loop() {
     text += resp;
   }
   if(text!=""){
-    //exibir_recebido(text);
+    exibir_recebido(text);
   }
 
   // Confere valores recebidos
   if(text == bbase_mais)    { posicao_base     += SALTO; }
   if(text == bbase_menos)   { posicao_base     -= SALTO; }
-  if(text == bgarra_mais)   { posicao_garra    += SALTO; }
-  if(text == bgarra_menos)  { posicao_garra    -= SALTO; }
+  if(text == bgarra_mais)   { posicao_garra    = 5; }
+  if(text == bgarra_menos)  { posicao_garra    = 80; }
   if(text == bsobe_mais)    { posicao_elevador += SALTO; }
   if(text == bsobe_menos)   { posicao_elevador -= SALTO; }
   if(text == bfrente_mais)  { posicao_frente   += SALTO; }
   if(text == bfrente_menos) { posicao_frente   -= SALTO; }
-
+  
   atualizarServos(); 
 
 }
 
-void pegar_pincel(){
-  posicao_frente   = 55;
-  atualizarServos();
-  posicao_base     = 145;
-  atualizarServos();
-  posicao_elevador = 120;
-  atualizarServos();
-  posicao_garra    = -15;
-  atualizarServos();
-  posicao_frente   = 105;
-  posicao_elevador = 135;
-  atualizarServos();
-  posicao_garra    = 70;
-  atualizarServos();
-  posicao_frente   = 80;
-  posicao_elevador = 175;
-  //////
-  atualizarServos();
-  posicao_elevador = 210;
-  atualizarServos();
-  posicao_frente   = 185;
-  posicao_base     = 80;
-  atualizarServos();
-  posicao_garra    = 35;
-  atualizarServos();
-  posicao_garra    = 50;
-  atualizarServos();
-  posicao_elevador = 165;
-  atualizarServos();
-  posicao_frente   = 140;
-  atualizarServos();
-}
 
 void exibir_recebido(String texto_recebido){
     Serial.println(" ");
@@ -166,7 +133,7 @@ void writeServos(int nServo, int posicao) {
 
   int pos = map ( posicao , 0 , 180 , SERVOMIN, SERVOMAX);
   pwm.setPWM(nServo , 0, pos);
-  delay(100);
+  delay(25);
 }
 
 void beginServos() {
